@@ -1,0 +1,47 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: voxsales-postgres
+    environment:
+      POSTGRES_USER: voxsales
+      POSTGRES_PASSWORD: voxsales_pass
+      POSTGRES_DB: voxsales_ai
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U voxsales -d voxsales_ai']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: voxsales-redis
+    ports:
+      - '6379:6379'
+
+  backend:
+    build: ./backend
+    container_name: voxsales-backend
+    ports:
+      - '5000:5000'
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+      DATABASE_URL: postgresql://voxsales:voxsales_pass@postgres:5432/voxsales_ai?schema=public
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      FRONTEND_URL: http://localhost:5173
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+volumes:
+  pgdata:
