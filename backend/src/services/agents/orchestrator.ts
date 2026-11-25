@@ -42,8 +42,8 @@ export function extractEntitiesFromMessage(
     result.companyName = compMatch[1].trim();
   }
 
-  // Employee / team size: "50 employees", "around 50 users", "team of 50"
-  const sizeMatch = text.match(/(?:around|about|roughly)?\s*(\d{1,5})\s*(?:employees|people|users|seats|members|staff)/i)
+  // Employee / team size: "50 employees", "10-person", "around 50 users", "team of 50"
+  const sizeMatch = text.match(/(?:around|about|roughly)?\s*(\d{1,5})(?:-|\s)*(?:employees|people|person|persons|users|seats|seat|members|member|staff)/i)
     || text.match(/team of\s*(\d{1,5})/i);
   if (sizeMatch) {
     result.companySize = parseInt(sizeMatch[1], 10);
@@ -216,14 +216,23 @@ export async function processCustomerTurn(params: {
   const MAX_TOOL_CALLS = 5;
 
   // 1. Customer & CRM Creation / Lookup
-  if (!conv.customerId && memory.customerName && toolCallsCount < MAX_TOOL_CALLS) {
+  const hasQualifyingSignal = Boolean(
+    memory.customerName ||
+      extracted.companySize ||
+      extracted.budgetMonthlyInr ||
+      extracted.requirements ||
+      extracted.askedPricingOrProduct ||
+      extracted.wantsDemoOrAppointment
+  );
+
+  if (!conv.customerId && hasQualifyingSignal && toolCallsCount < MAX_TOOL_CALLS) {
     toolCallsCount++;
     const custRes = await executeAgentTool({
       organizationId: params.organizationId,
       conversationId: conv.id,
       toolName: 'create_customer',
       input: {
-        fullName: String(memory.customerName),
+        fullName: memory.customerName ? String(memory.customerName) : `Prospect (${conv.id.slice(-5)})`,
         companyName: memory.company ? String(memory.company) : null,
         preferredLang: lang,
       },
@@ -232,6 +241,13 @@ export async function processCustomerTurn(params: {
       const cust = custRes.result.customer as { id: string };
       conv.customerId = cust.id;
     }
+  } else if (conv.customerId && extracted.fullName) {
+    // Update placeholder prospect name if customer shares their name later in the call
+    const existingCust = store.db.customers.find((c) => c.id === conv.customerId);
+    if (existingCust && existingCust.fullName.startsWith('Prospect (')) {
+      existingCust.fullName = extracted.fullName;
+      existingCust.updatedAt = new Date().toISOString();
+    }
   }
 
   // If customer exists, ensure lead is created/updated & scored
@@ -239,7 +255,7 @@ export async function processCustomerTurn(params: {
     ? store.db.leads.find((l) => l.id === conv.leadId) ?? null
     : null;
 
-  if (conv.customerId && (extracted.companySize || extracted.budgetMonthlyInr || extracted.requirements || extracted.confirmedAppointment) && toolCallsCount < MAX_TOOL_CALLS) {
+  if (conv.customerId && (extracted.companySize || extracted.budgetMonthlyInr || extracted.requirements || extracted.askedPricingOrProduct || extracted.wantsDemoOrAppointment || extracted.confirmedAppointment) && toolCallsCount < MAX_TOOL_CALLS) {
     toolCallsCount++;
     const leadRes = await executeAgentTool({
       organizationId: params.organizationId,

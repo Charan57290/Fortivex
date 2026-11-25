@@ -361,8 +361,14 @@ export function VoiceAgentPage() {
       setMessages((prev) => [...prev, res.customerMessage, res.aiMessage]);
       setSessionMemory(res.sessionMemory || {});
       if (res.lead) setLiveLead(res.lead);
+      queryClient.invalidateQueries({ queryKey: ['leads'] });
+      queryClient.invalidateQueries({ queryKey: ['leads-pipeline'] });
+      queryClient.invalidateQueries({ queryKey: ['customers'] });
+      queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-overview'] });
       if (res.appointment) {
         setBookedApt(res.appointment);
+        queryClient.invalidateQueries({ queryKey: ['appointments'] });
         toast({
           title: 'Appointment Confirmed',
           description: res.appointment.title,
@@ -370,6 +376,7 @@ export function VoiceAgentPage() {
         });
       }
       if (res.handoff) {
+        queryClient.invalidateQueries({ queryKey: ['handoffs'] });
         toast({
           title: 'Escalated to Human Specialist',
           description: res.handoff.reason,
