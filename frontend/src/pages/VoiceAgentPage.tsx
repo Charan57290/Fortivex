@@ -397,14 +397,48 @@ export function VoiceAgentPage() {
     }
   };
 
-  const runRahulScenario = async () => {
-    if (!conversationId) {
+  const QUICK_SCENARIOS = [
+    {
+      id: 'rahul',
+      label: 'Rahul Sharma (50 seats, ₹15k/mo)',
+      text: "Hello, I'm Rahul Sharma and I'm looking for project management software for my company. We have around 50 employees and our budget is approximately ₹15,000 per month.",
+    },
+    {
+      id: 'sneha',
+      label: 'Starter Plan (10-person team)',
+      text: "Hi, I'm Sneha from a 10-person design team. What is the monthly price for your Starter Plan and what features are included?",
+    },
+    {
+      id: 'enterprise',
+      label: 'Enterprise (120 seats, SSO/RBAC)',
+      text: "We have 120 employees and need SAML SSO, custom role-based access control, and a 99.99% uptime SLA. Which plan fits us and what does it cost?",
+    },
+    {
+      id: 'security',
+      label: 'Security & DPDP Compliance',
+      text: 'Is FlowStack SOC 2 Type II certified, and do you support Indian data residency for DPDP Act compliance?',
+    },
+    {
+      id: 'confirm-slot',
+      label: 'Confirm First Demo Slot',
+      text: 'Yes, please confirm the first available slot for tomorrow. We want to roll out this month.',
+    },
+    {
+      id: 'handoff',
+      label: 'Escalate to Human Manager',
+      text: 'Can I speak to a human sales manager about a custom NDA?',
+    },
+  ];
+
+  const [selectedScenarioId, setSelectedScenarioId] = useState(QUICK_SCENARIOS[0].id);
+
+  const runSelectedScenario = async () => {
+    if (!conversationIdRef.current && !conversationId) {
       toast({ title: 'Start a call first', description: 'Click Start Call to begin the scenario.', type: 'info' });
       return;
     }
-    await sendMessage(
-      "Hello, I'm Rahul Sharma and I'm looking for project management software for my company. We have around 50 employees and our budget is approximately ₹15,000 per month."
-    );
+    const found = QUICK_SCENARIOS.find((s) => s.id === selectedScenarioId) || QUICK_SCENARIOS[0];
+    await sendMessage(found.text);
   };
 
   const formatTime = (sec: number) => {
@@ -594,14 +628,27 @@ export function VoiceAgentPage() {
             </label>
 
             {isCallActive && (
-              <button
-                type="button"
-                onClick={runRahulScenario}
-                className="px-2.5 py-1 rounded-md bg-[#6366F1]/15 text-[#6366F1] border border-[#6366F1]/30 hover:bg-[#6366F1]/25 inline-flex items-center gap-1 font-medium"
-              >
-                <Play className="w-3 h-3" />
-                Send Rahul Sharma Test Input
-              </button>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <select
+                  value={selectedScenarioId}
+                  onChange={(e) => setSelectedScenarioId(e.target.value)}
+                  className="px-2.5 py-1 rounded-md bg-[#090D16] border border-slate-800 text-xs text-slate-200 max-w-[230px]"
+                >
+                  {QUICK_SCENARIOS.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.label}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={runSelectedScenario}
+                  className="px-2.5 py-1 rounded-md bg-[#6366F1]/15 text-[#6366F1] border border-[#6366F1]/30 hover:bg-[#6366F1]/25 inline-flex items-center gap-1 font-medium"
+                >
+                  <Play className="w-3 h-3" />
+                  Send Test
+                </button>
+              </div>
             )}
           </div>
 
