@@ -5,4 +5,5 @@ build/
 *.local
 backend/data/
 *.log
+*.tsbuildinfo
 .DS_Store
