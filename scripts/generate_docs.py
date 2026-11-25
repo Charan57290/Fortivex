@@ -133,39 +133,56 @@ def generate_one_page_pdf():
 
     story = []
     story.append(Paragraph('VoxSales AI — Autonomous AI Sales Voice Agent (One-Page Project Report)', title_style))
-    story.append(Paragraph('Technical Evaluation Project for FORTIVEX AI PRIVATE LIMITED | Candidate: [Your Name] | Role: Full-Stack & AI Engineer | Date: [Date]', sub_style))
+    story.append(
+        Paragraph(
+            'Technical Evaluation Project for FORTIVEX AI PRIVATE LIMITED | Candidate: <b>Thota Mohana Naga Venkata Kali Charan</b> | Role: Full-Stack &amp; AI Engineer | Date: <b>26-11-2026</b>',
+            sub_style,
+        )
+    )
+
+    cell_label = ParagraphStyle('CellLabel', parent=styles['Normal'], fontSize=8, leading=10.5, fontName='Helvetica-Bold', textColor=colors.HexColor('#312E81'))
+    cell_val = ParagraphStyle('CellVal', parent=styles['Normal'], fontSize=8, leading=10.5, textColor=colors.HexColor('#0F172A'))
 
     meta_table = Table(
         [
-            ['Business Problem', 'Inbound B2B sales teams face slow lead qualification, inconsistent product answers, manual CRM entry, and missed after-hours demos.'],
-            ['Proposed Solution', 'An autonomous AI voice sales platform combining Web Speech STT/TTS, Google Gemini, pgvector RAG, explainable lead scoring, CRM automation, and conflict-free scheduling.'],
-            ['Tech Stack', 'React 18, TypeScript, Vite, Tailwind, Recharts, TanStack Query | Node.js, Express, Socket.IO, Zod, JWT | PostgreSQL, Prisma, pgvector, Redis | Google Gemini API.'],
+            [
+                Paragraph('Business Problem', cell_label),
+                Paragraph('Inbound B2B sales teams face slow lead qualification, inconsistent product answers, manual CRM entry, and missed after-hours demos.', cell_val),
+            ],
+            [
+                Paragraph('Proposed Solution', cell_label),
+                Paragraph('An autonomous AI voice sales platform combining Web Speech STT/TTS, Google Gemini, pgvector RAG, explainable lead scoring, CRM automation, and conflict-free scheduling.', cell_val),
+            ],
+            [
+                Paragraph('Tech Stack', cell_label),
+                Paragraph('React 18, TypeScript, Vite, Tailwind, Recharts, TanStack Query | Node.js, Express, Socket.IO, Zod, JWT | PostgreSQL, Prisma, pgvector, Redis | Google Gemini API.', cell_val),
+            ],
         ],
         colWidths=[34 * mm, 148 * mm],
     )
     meta_table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#EEF2FF')),
-        ('TEXTCOLOR', (0, 0), (0, -1), colors.HexColor('#312E81')),
-        ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, -1), 7.8),
         ('VALIGN', (0, 0), (-1, -1), 'TOP'),
         ('GRID', (0, 0), (-1, -1), 0.4, colors.HexColor('#CBD5E1')),
-        ('PADDING', (0, 0), (-1, -1), 4),
+        ('LEFTPADDING', (0, 0), (-1, -1), 5),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 5),
+        ('TOPPADDING', (0, 0), (-1, -1), 4),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
     ]))
     story.append(meta_table)
-    story.append(Spacer(1, 3))
+    story.append(Spacer(1, 4))
 
     sections = [
         ('Main Features & System Architecture',
          'Modular monolith with 12 UI modules: Executive Overview, AI Voice Agent Studio (EN/HI/TE), Agent Studio, Lead Intelligence, Customers, Kanban CRM Pipeline, Call History, Appointments, RAG Knowledge Base, Analytics, Human Handoff, and Settings/Cost Calculator. Supports Live Gemini Mode and offline Demo Mode.'),
         ('End-to-End Workflow (Verified Acceptance Scenario)',
-         '1) Customer Rahul Sharma initiates a voice/text call -> 2) States 50 employees & ₹15,000/mo budget -> 3) Orchestrator extracts entities, creates Customer & Lead, retrieves FlowStack Growth-50 pricing via RAG, and scores the lead -> 4) Offers available demo slots -> 5) Books confirmed slot without double-booking -> 6) Generates AI Sentiment & Call Summary -> 7) Updates CRM Pipeline and Dashboard KPIs.'),
+         '1) Customer Rahul Sharma initiates a voice/text call -> 2) States 50 employees & INR 15,000/mo budget -> 3) Orchestrator extracts entities, creates Customer & Lead, retrieves FlowStack Growth-50 pricing via RAG, and scores the lead -> 4) Offers available demo slots -> 5) Books confirmed slot without double-booking -> 6) Generates AI Sentiment & Call Summary -> 7) Updates CRM Pipeline and Dashboard KPIs.'),
         ('AI, Agentic Orchestration & RAG Implementation',
-         'Provider-abstracted LLM layer (Google Gemini 2.0 Flash + text-embedding-004). Bounded tool execution (max 5 calls/turn) with Zod-validated tools logged to AgentToolExecution. RAG pipeline sanitizes uploaded PDF/TXT files against prompt injection, chunks text, indexes 768-dim vectors, and returns source-attributed chunks.'),
+         'Provider-abstracted LLM layer (Google Gemini 3.8 Flash + text-embedding-004). Bounded tool execution (max 5 calls/turn) with Zod-validated tools logged to AgentToolExecution. RAG pipeline sanitizes uploaded PDF/TXT files against prompt injection, chunks text, indexes 768-dim vectors, and returns source-attributed chunks.'),
         ('Scalability (100k Users) & Security',
-         'Distinguishes 100k registered users from ~15k DAU and ~500–1,500 concurrent voice sessions. Scales via CDN, stateless Express pods, Redis Socket.IO adapter, PgBouncer pooling, and BullMQ async workers. Security includes bcrypt, JWT RBAC, strict organizationId isolation, rate limiting, Helmet, and opt-in voice consent.'),
+         'Distinguishes 100k registered users from ~15k DAU and ~500-1,500 concurrent voice sessions. Scales via CDN, stateless Express pods, Redis Socket.IO adapter, PgBouncer pooling, and BullMQ async workers. Security includes bcrypt, JWT RBAC, strict organizationId isolation, rate limiting, Helmet, and opt-in voice consent.'),
         ('Commercial Feasibility & Future Scope',
-         'Estimated operating cost ~$0.015–$0.04/call using Gemini Flash & Browser Web Speech ($0 STT/TTS), enabling profitable Starter ($49/mo), Pro ($199/mo), and Enterprise ($799+/mo) tiers. Future scope: HubSpot/Salesforce sync, Google Calendar OAuth, SIP telephony, and streaming cloud STT/TTS.'),
+         'Estimated operating cost ~$0.015-$0.04/call using Gemini Flash & Browser Web Speech ($0 STT/TTS), enabling profitable Starter ($49/mo), Pro ($199/mo), and Enterprise ($799+/mo) tiers. Future scope: HubSpot/Salesforce sync, Google Calendar OAuth, SIP telephony, and streaming cloud STT/TTS.'),
     ]
 
     for heading, text in sections:
