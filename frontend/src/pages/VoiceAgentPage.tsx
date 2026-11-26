@@ -406,33 +406,43 @@ export function VoiceAgentPage() {
 
   const QUICK_SCENARIOS = [
     {
+      id: 'hello',
+      label: '1. Greeting: "Hello"',
+      text: 'Hello',
+    },
+    {
+      id: 'name-company',
+      label: '2. Name & Company (Rahul, NexaTech)',
+      text: "My name is Rahul Sharma and I'm calling from NexaTech Solutions.",
+    },
+    {
       id: 'rahul',
-      label: 'Rahul Sharma (50 seats, ₹15k/mo)',
+      label: '3. Full Inquiry (50 seats, ₹15k/mo)',
       text: "Hello, I'm Rahul Sharma and I'm looking for project management software for my company. We have around 50 employees and our budget is approximately ₹15,000 per month.",
     },
     {
       id: 'sneha',
-      label: 'Starter Plan (10-person team)',
+      label: '4. Starter Plan (10-person team)',
       text: "Hi, I'm Sneha from a 10-person design team. What is the monthly price for your Starter Plan and what features are included?",
     },
     {
       id: 'enterprise',
-      label: 'Enterprise (120 seats, SSO/RBAC)',
-      text: "We have 120 employees and need SAML SSO, custom role-based access control, and a 99.99% uptime SLA. Which plan fits us and what does it cost?",
+      label: '5. Enterprise (120 seats, SSO/RBAC)',
+      text: 'We have 120 employees and need SAML SSO, custom role-based access control, and a 99.99% uptime SLA. Which plan fits us and what does it cost?',
     },
     {
       id: 'security',
-      label: 'Security & DPDP Compliance',
+      label: '6. Security & DPDP Compliance',
       text: 'Is FlowStack SOC 2 Type II certified, and do you support Indian data residency for DPDP Act compliance?',
     },
     {
       id: 'confirm-slot',
-      label: 'Confirm First Demo Slot',
+      label: '7. Confirm First Demo Slot',
       text: 'Yes, please confirm the first available slot for tomorrow. We want to roll out this month.',
     },
     {
       id: 'handoff',
-      label: 'Escalate to Human Manager',
+      label: '8. Escalate to Human Manager',
       text: 'Can I speak to a human sales manager about a custom NDA?',
     },
   ];

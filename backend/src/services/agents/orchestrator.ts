@@ -384,10 +384,14 @@ export async function processCustomerTurn(params: {
 Personality: ${config?.personality || 'Consultative and concise'}.
 Sales tone: ${config?.salesTone || 'Professional & Consultative'}.
 Respond in ${langLabel}. Keep responses concise (2-4 sentences, ideal for voice TTS).
-Never fabricate product prices or features. Ground answers strictly in the Retrieved Knowledge Context below.
-If an appointment was just booked, confirm the exact time clearly.
-If slots were retrieved and no appointment is booked yet, offer the two available slots and ask for confirmation.
-If the customer has not shared their name, company size, or timeline yet, ask one helpful follow-up question.
+
+CONVERSATION FLOW RULES (follow step-by-step, do NOT dump everything in a single answer):
+1. Greeting & Primary Details First: If the customer simply greets you (e.g., "hello", "hi") and you do not yet have their name or company in Session Memory, greet them warmly, say "Hope you are having a great day!", and ask for their name and company details first.
+2. Requirements Next: Once you have their name/company, if requirements are missing, ask about their project management requirements and pain points.
+3. Qualification Details: Next, ask for their team size, approximate monthly budget, and timeline one step at a time.
+4. Grounded Recommendation & Demo: Never fabricate product prices or features. Ground answers strictly in the Retrieved Knowledge Context below. Once you understand their needs, recommend the fitting plan and offer available demo slots.
+5. Appointment Confirmation: If an appointment was just booked, confirm the exact time clearly. If slots were retrieved and no appointment is booked yet, offer the two available slots and ask for confirmation.
+6. Call Ending: If the customer says goodbye or asks to end the call, thank them politely and wrap up without asking more questions.
 
 Session Memory: ${JSON.stringify(memory)}
 Lead Status: ${activeLead ? `Score ${activeLead.score}/100 (${activeLead.classification}), Recommended: ${activeLead.recommendedPlan}` : 'Not scored yet'}
@@ -491,6 +495,15 @@ function buildDemoAgentReply(ctx: {
     return `Wonderful, ${greetingPrefix}your product demonstration is confirmed for ${timeLabel}. I have updated your profile in our CRM and generated a meeting link. Is there anything specific you would like our specialist to cover during the demo?`;
   }
 
+  const lower = ctx.customerText.toLowerCase().trim();
+  const isSimpleGreeting =
+    /^(hi|hello|hey|good morning|good afternoon|good evening|namaste|hola)[!.?\s]*$/i.test(lower) ||
+    (lower.split(/\s+/).length <= 4 && (lower.includes('hello') || lower.includes('hi ') || lower.startsWith('hi')));
+
+  if (isSimpleGreeting && !ctx.memory.customerName) {
+    return `Hello! Hope you are having a great day. Could you please tell me your name and your company details so I can assist you better?`;
+  }
+
   const parts: string[] = [];
 
   if (ctx.retrievedChunks.length > 0 && (ctx.memory.companySize || ctx.memory.budgetMonthlyInr)) {
@@ -500,6 +513,10 @@ function buildDemoAgentReply(ctx: {
     );
   } else if (ctx.retrievedChunks.length > 0) {
     parts.push(`Based on our FlowStack documentation: ${ctx.retrievedChunks[0].snippet}`);
+  } else if (ctx.memory.customerName && !ctx.memory.companySize && !ctx.memory.budgetMonthlyInr) {
+    parts.push(
+      `Nice to meet you, ${name}${ctx.memory.company ? ` from ${ctx.memory.company}` : ''}! Hope you are having a great day.`
+    );
   } else {
     parts.push(
       `Thanks for sharing that${name ? `, ${name}` : ''}! I'd love to help match you with the right FlowStack project management plan.`
@@ -507,7 +524,9 @@ function buildDemoAgentReply(ctx: {
   }
 
   if (!ctx.memory.customerName) {
-    parts.push('May I have your full name and company name so I can personalize a recommendation for you?');
+    parts.push('Could you please tell me your full name and company details?');
+  } else if (!ctx.memory.requirements && !ctx.memory.companySize) {
+    parts.push('What specific project management requirements or challenges is your team looking to solve?');
   } else if (!ctx.memory.companySize || !ctx.memory.budgetMonthlyInr) {
     parts.push('Could you share your approximate team size and monthly budget so I can recommend the best plan?');
   } else if (ctx.availableSlots.length > 0) {
